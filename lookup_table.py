@@ -1,4 +1,5 @@
 import xlrd
+import re
 # row starts from 1
 # col starts from 0
 
@@ -24,30 +25,46 @@ class LookupTable(object):
 
 	def set_all_lookup_attributes(self):
 		for idx in step_range(0, self.sheet.ncols-2, 2):
-			self.attributes[self.sheet.cell_value(1, idx)] = idx			
+			#should modify to separate /
+			attribute_names = self.sheet.cell_value(1, idx)
+			attribute_names = re.split('/', attribute_names)
+			for aidx, val in enumerate(attribute_names):
+				if val is not "":
+					self.attributes[val] = idx
+			# 			
 		return self.attributes.keys()
 
 	# return lookup dic	
 	def get_lookup_attributes(self, lookup_attribute):
-		cidx = self.attributes[lookup_attribute]
 		lookup_table = {}
-		if cidx is not None:
+		if lookup_attribute in self.attributes.keys():
+			cidx = self.attributes[lookup_attribute]
 			ridx = 3
 			didx = cidx + 1
-			while(True):
-				code_val = self.sheet.cell_value(ridx, cidx)
-				if code_val is "":
-					break
-				des_val = self.sheet.cell_value(ridx, didx)
+			ddidx = cidx + 2
+			while(ridx < self.sheet.nrows):
+				if lookup_attribute is 'HOUSETOWN' or lookup_attribute is 'CONNTOWN':
+					code_val = self.sheet.cell_value(ridx, didx)
+					if code_val is "":
+						break
+					des_val = self.sheet.cell_value(ridx, ddidx)
+				else:
+					code_val = self.sheet.cell_value(ridx, cidx)
+					if code_val is "":
+						break
+					des_val = self.sheet.cell_value(ridx, didx)
+					
 				lookup_table[code_val] = des_val
 				ridx += 1
 			return lookup_table		
 		else:	
 			return False
-book = LookupTable('/Users/brianpan/Desktop/data/lookup_table.xlsx')
-book.set_sheet_id(1)
 
-book.get_basic_info()
+if __name__ == "__main__":
+	book = LookupTable('/Users/brianpan/Desktop/data/lookup_table.xlsx')
+	book.set_sheet_id(1)
 
-print(book.set_all_lookup_attributes())
-print(book.get_lookup_attributes('VDTYPE'))
+	book.get_basic_info()
+
+	print(book.set_all_lookup_attributes())
+	print(book.get_lookup_attributes('HOUSETOWN'))
