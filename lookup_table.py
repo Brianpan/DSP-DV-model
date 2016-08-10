@@ -22,7 +22,7 @@ class LookupTable(object):
 														  self.sheet.ncols))	
 	def get_lookup_cell(self, rowx, colx):
 		print("{0}".format(self.sheet.cell_value(rowx=rowx, colx=colx)))
-
+		return self.sheet.cell_value(rowx=rowx, colx=colx)
 	def set_all_lookup_attributes(self):
 		for idx in step_range(0, self.sheet.ncols-2, 2):
 			#should modify to separate /
@@ -43,14 +43,14 @@ class LookupTable(object):
 			didx = cidx + 1
 			ddidx = cidx + 2
 			while(ridx < self.sheet.nrows):
-				if lookup_attribute is 'HOUSETOWN' or lookup_attribute is 'CONNTOWN':
+				if lookup_attribute == 'HOUSETOWN' or lookup_attribute == 'CONNTOWN' or lookup_attribute == 'PERMTOWN':
 					code_val = self.sheet.cell_value(ridx, didx)
-					if code_val is "":
+					if code_val == "":
 						break
 					des_val = self.sheet.cell_value(ridx, ddidx)
 				else:
 					code_val = self.sheet.cell_value(ridx, cidx)
-					if code_val is "":
+					if code_val == "":
 						break
 					des_val = self.sheet.cell_value(ridx, didx)
 					
@@ -68,3 +68,5 @@ if __name__ == "__main__":
 
 	print(book.set_all_lookup_attributes())
 	print(book.get_lookup_attributes('HOUSETOWN'))
+	x = book.get_lookup_attributes('HOUSETOWN')
+	print(x['6300900000'])
