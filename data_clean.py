@@ -4,11 +4,13 @@ import datetime
 import re
 
 from lookup_table import LookupTable
+from token_table import TokenTable
 
 def step_range(start, end, step):
 	while start <= end:
 		yield start
 		start += step
+
 # do birthday trans
 def birthday_trans(old_type):
 	if len(old_type) < 7:
@@ -22,6 +24,7 @@ def birthday_trans(old_type):
 		day = old_type[5:7]	
 		birthdate = year + '/' + month + '/' + day
 		return birthdate
+
 def age_trans(birthdate):
 	if birthdate == '':
 		return ''
@@ -35,8 +38,22 @@ def age_trans(birthdate):
 			return ''
 		return age
 
-# load lookup table
-if __name__ == "__main__":
+# 對 DVAS做資料binary化 
+def tokenize_sheet():
+	# book file
+	book = xlrd.open_workbook('/Users/brianpan/Desktop/data/DVAS.xlsx')
+	sheet = book.sheet_by_index(0)
+
+	# output file
+	output = xlwt.Workbook(encoding="utf-8")
+	# two separate sheet
+	output_sheet = output.add_sheet("1")
+	token_sheet = output.add_sheet("2")
+
+	output.save("/Users/brianpan/Desktop/data/DVAS_clean.xlsx")
+
+# clean 被害人相對人, 通報表資料
+def lookup_process():
 	lookup_book = LookupTable('/Users/brianpan/Desktop/data/lookup_table.xlsx')
 	lookup_book.set_sheet_id(1)
 
@@ -106,3 +123,8 @@ if __name__ == "__main__":
 
 	# output.save("/Users/brianpan/Desktop/data/通報表被害人相對人資料_clean.xls")
 	output.save("/Users/brianpan/Desktop/data/個案被害人相對人資料_clean.xls")
+# load lookup table
+if __name__ == "__main__":
+
+
+
