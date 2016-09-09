@@ -47,15 +47,18 @@ class TokenTable(object):
 			for dic_val in ["MAIMED", "off_MAIMED"]:
 				token_hash[dic_val] = ['', '非身心障礙者', '疑似身心障礙者', '身心障礙']
 			# print token hash	
-			print(token_hash)
+			# print(token_hash)
 
 			# start col_id
 			token_cid = 0
 
+			# return hash
+			return_hash = {}
 			# start write to token sheet
 			for key, val_arr in token_hash.items():
 				token_rid = 0
 				tmp_token_cid = token_cid
+				return_hash[key] = {}
 
 				# write header
 				title_arr = [key, "原始名稱", "代碼"]
@@ -69,9 +72,12 @@ class TokenTable(object):
 				for i, content_val in enumerate(val_arr):
 					self.token_sheet.write(token_rid, token_cid+1, content_val)
 					self.token_sheet.write(token_rid, token_cid+2, i)
+					return_hash[key][content_val] = i
 					token_rid += 1
 
-				token_cid += 3	
+				token_cid += 3
+
+			return return_hash
 	# parse data strategy				
 	def parse_cell(self, target_attr, ridx, cidx):
 		cell_value = self.target_sheet.cell_value(ridx, cidx)
@@ -96,22 +102,21 @@ class TokenTable(object):
 		# 	cell_value = re.split("－", cell_value)[0]
 		# 	return cell_value
 
-if __name__ == "__main__":
-	book = xlrd.open_workbook('/Users/brianpan/Desktop/data/DVAS建模用.xlsx')
-	sheet = book.sheet_by_index(0)
+# if __name__ == "__main__":
+# 	book = xlrd.open_workbook('/Users/brianpan/Desktop/data/DVAS建模用.xlsx')
+# 	sheet = book.sheet_by_index(0)
 
-	# output file
-	output = xlwt.Workbook(encoding="utf-8")
+# 	# output file
+# 	output = xlwt.Workbook(encoding="utf-8")
 
-	# two separate sheet
-	output_sheet = output.add_sheet("1")
-	token_sheet = output.add_sheet("2")
-	print(sheet, token_sheet)
-	token_table = TokenTable(sheet, token_sheet)
+# 	# two separate sheet
+# 	token_sheet = output.add_sheet("1")
+# 	print(sheet, token_sheet)
+# 	token_table = TokenTable(sheet, token_sheet)
 
-	token_table.get_basic_info()
-	token_list = ["家暴因素.可複選.", "成人家庭暴力兩造關係", 
-				"暴力型態.可複選.", "EDUCATION", "off_EDUCATION"]
+# 	token_table.get_basic_info()
+# 	token_list = ["家暴因素.可複選.", "成人家庭暴力兩造關係", 
+# 				"暴力型態.可複選.", "EDUCATION", "off_EDUCATION"]
 
-	token_table.set_token_attr(token_list)
-	output.save("/Users/brianpan/Desktop/data/DVAS_clean.xlsx")
+# 	token_table.set_token_attr(token_list)
+# 	output.save("/Users/brianpan/Desktop/data/token.xlsx")

@@ -38,19 +38,34 @@ def age_trans(birthdate):
 			return ''
 		return age
 
+def generate_token(sheet):
+	output = xlwt.Workbook(encoding="utf-8")
+
+	# two separate sheet
+	token_sheet = output.add_sheet("1")
+	print(sheet, token_sheet)
+	token_table = TokenTable(sheet, token_sheet)
+
+	token_table.get_basic_info()
+	token_list = ["家暴因素.可複選.", "成人家庭暴力兩造關係", 
+				"暴力型態.可複選.", "EDUCATION", "off_EDUCATION"]
+
+	token_hash = token_table.set_token_attr(token_list)
+	output.save("/Users/brianpan/Desktop/data/token.xlsx")
+
+	return token_hash
+	
 # 對 DVAS做資料binary化 
 def tokenize_sheet():
 	# book file
-	book = xlrd.open_workbook('/Users/brianpan/Desktop/data/DVAS.xlsx')
+	book = xlrd.open_workbook('/Users/brianpan/Desktop/data/DVAS建模用.xlsx')
 	sheet = book.sheet_by_index(0)
 
-	# output file
-	output = xlwt.Workbook(encoding="utf-8")
-	# two separate sheet
-	output_sheet = output.add_sheet("1")
-	token_sheet = output.add_sheet("2")
+	# load token
+	token_hash = generate_token(sheet)
+	print(token_hash)
 
-	output.save("/Users/brianpan/Desktop/data/DVAS_clean.xlsx")
+	# output file
 
 # clean 被害人相對人, 通報表資料
 def lookup_process():
@@ -125,6 +140,6 @@ def lookup_process():
 	output.save("/Users/brianpan/Desktop/data/個案被害人相對人資料_clean.xls")
 # load lookup table
 if __name__ == "__main__":
-
+	tokenize_sheet()
 
 
