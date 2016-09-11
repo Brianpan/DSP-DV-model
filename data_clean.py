@@ -64,7 +64,8 @@ def trans_token(token, used_token_list):
 def tokenize_sheet():
 	# book file
 	book = xlrd.open_workbook('/Users/brianpan/Desktop/data/DVAS建模用.xlsx')
-	sheet = book.sheet_by_index(0)
+	# load sheet 2 已補過特定missing value
+	sheet = book.sheet_by_index(2)
 
 	# load token
 	token_hash = generate_token(sheet)
@@ -91,6 +92,7 @@ def tokenize_sheet():
 				
 				# should sort key again !!!
 				expand_cols = sorted(token_hash[attribute].keys())
+				
 				print(expand_cols)
 
 				sub_feature_num = len(expand_cols) - 1 
@@ -122,11 +124,34 @@ def tokenize_sheet():
 			else:			
 				output_sheet.write(0, wcol, attribute)
 				
-				# for ridx in step_range(1, sheet.nrows-1, 1):
-				# 	if attribute == "MAIMED" or attribute == "off_MAIMED":
-				# 	elif attribute == "EDUCATION" or attribute == "off_EDUCATION":
-				# 	else:
-
+				for ridx in step_range(1, sheet.nrows-1, 1):
+					data_val = sheet.cell_value(rowx=ridx, colx=idx)
+					
+					if attribute == "MAIMED" or attribute == "off_MAIMED":
+						if data_val == '':
+							output_sheet.write(ridx, wcol, "NA")
+						else:
+							to_parse = re.split(",", data_val)[0]
+							if re.match('疑似身心障礙.*', to_parse):
+								write_val = used_token_list["身心障礙"]
+								output_sheet.write(ridx, wcol, write_val)
+							elif re.match('領有身心障礙.*', to_parse):
+								write_val = used_token_list["疑似身心障礙者"]
+								output_sheet.write(ridx, wcol, write_val)
+							else:
+								write_val = used_token_list["非身心障礙者"]
+								output_sheet.write(ridx, wcol, write_val)	
+					elif attribute == "EDUCATION" or attribute == "off_EDUCATION":
+						if data_val == '' or data_val == '不詳':
+							output_sheet.write(ridx, wcol, "NA")
+						else:
+							output_sheet.write(ridx, wcol, used_token_list[data_val])	
+					# 成人家庭暴力兩造關係	
+					else:
+						if data_val == '':
+							output_sheet.write(ridx, wcol, "NA")
+						else:	
+							output_sheet.write(ridx, wcol, used_token_list[data_val])
 				wcol += 1
 		else:
 			output_sheet.write(0, wcol, attribute)
