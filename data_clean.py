@@ -55,7 +55,12 @@ def generate_token(sheet):
 
 	return token_hash
 	
-# 對 DVAS做資料binary化 
+# 對 DVAS做資料binary化
+
+# mutiple token 轉換
+def trans_token(token, used_token_list):
+	return int(used_token_list[token]) - 1  		
+
 def tokenize_sheet():
 	# book file
 	book = xlrd.open_workbook('/Users/brianpan/Desktop/data/DVAS建模用.xlsx')
@@ -66,6 +71,74 @@ def tokenize_sheet():
 	print(token_hash)
 
 	# output file
+	output = xlwt.Workbook(encoding="utf-8")
+	output_sheet = output.add_sheet("1")
+
+	clean_list = ["家暴因素.可複選.", "成人家庭暴力兩造關係",
+				"MAIMED", "off_MAIMED", 
+				"暴力型態.可複選.", "EDUCATION", "off_EDUCATION"]
+	wcol = 0
+	for idx in range(sheet.ncols):
+		attribute = sheet.cell_value(rowx=0,colx=idx)
+		
+		print("--- {0}% Start cleaning : {1} ---".format(round((idx/sheet.ncols)*100, 2), attribute))
+		
+		# need clean
+		if attribute in token_hash.keys():
+			used_token_list = token_hash[attribute]
+			# mutiple one to cols
+			if attribute == "家暴因素.可複選." or attribute == "暴力型態.可複選.":
+				
+				# should sort key again !!!
+				expand_cols = sorted(token_hash[attribute].keys())
+				print(expand_cols)
+
+				sub_feature_num = len(expand_cols) - 1 
+				for l_idx, expand_col in enumerate(expand_cols):
+					if expand_col != "":
+						output_sheet.write(0, wcol+l_idx-1, attribute + "-"+ expand_col)
+				for ridx in step_range(1, sheet.nrows-1, 1):
+					data_val = sheet.cell_value(rowx=ridx,colx=idx)
+					# missing value
+					if data_val == '':
+						for sub_idx in range(sub_feature_num):
+							output_sheet.write(ridx, wcol + sub_idx, "NA")
+					else:
+						try:
+							tokens = re.split(",", data_val)
+							is_idx = [trans_token(token, used_token_list) for token in tokens]
+						except:
+							print(data_val)
+
+						for sub_idx in range(sub_feature_num):
+							if sub_idx in is_idx:
+								output_sheet.write(ridx, wcol+sub_idx, 1)
+							else:
+								output_sheet.write(ridx, wcol+sub_idx, 0)
+										
+				# should ignore '' token		
+				wcol += sub_feature_num
+			# one col
+			else:			
+				output_sheet.write(0, wcol, attribute)
+				
+				# for ridx in step_range(1, sheet.nrows-1, 1):
+				# 	if attribute == "MAIMED" or attribute == "off_MAIMED":
+				# 	elif attribute == "EDUCATION" or attribute == "off_EDUCATION":
+				# 	else:
+
+				wcol += 1
+		else:
+			output_sheet.write(0, wcol, attribute)
+			for ridx in range(sheet.nrows):
+				if ridx == 0:
+					print("--")
+				else:
+					cell_val = sheet.cell_value(rowx=ridx,colx=idx)
+					output_sheet.write(ridx, wcol, cell_val)	
+			wcol += 1
+
+	output.save("/Users/brianpan/Desktop/data/DVAS_clean.xlsx")
 
 # clean 被害人相對人, 通報表資料
 def lookup_process():
