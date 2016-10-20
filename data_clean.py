@@ -65,7 +65,8 @@ def tokenize_sheet():
 	# book file
 	book = xlrd.open_workbook('/Users/brianpan/Desktop/data/DVAS建模用.xlsx')
 	# load sheet 2 已補過特定missing value
-	sheet = book.sheet_by_index(2)
+	# load sheet 0 沒補過資料的
+	sheet = book.sheet_by_index(3)
 
 	# load token
 	token_hash = generate_token(sheet)
@@ -101,6 +102,15 @@ def tokenize_sheet():
 						output_sheet.write(0, wcol+l_idx-1, attribute + "-"+ expand_col)
 				for ridx in step_range(1, sheet.nrows-1, 1):
 					data_val = sheet.cell_value(rowx=ridx,colx=idx)
+					# 拿後面本次家暴因素補值
+					if attribute == "家暴因素.可複選.":
+						overwrite_val = sheet.cell_value(rowx=ridx,colx=idx+2)
+					else:
+						overwrite_val = sheet.cell_value(rowx=ridx,colx=idx+1)
+						
+					if data_val == '':
+						data_val = overwrite_val
+
 					# missing value
 					if data_val == '':
 						for sub_idx in range(sub_feature_num):
