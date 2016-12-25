@@ -1,11 +1,11 @@
-dest_file <- "/Users/brianpan/Desktop/data/train2.csv"
+dest_file <- "/Users/brianpan/Desktop/data/model/train2.csv"
 
 setwd("/Users/brianpan/Desktop/data");
 getwd();
 
 library(mice);
 
-to_clean <- read.csv("/Users/brianpan/Desktop/data/train.csv", header=T)
+to_clean <- read.csv("/Users/brianpan/Desktop/data/traindata/train.csv", header=T)
 removed <- subset(to_clean, select=c(district, town, ACTIONID))
 
 to_clean <- subset(to_clean, select=- c(district, town, ACTIONID))

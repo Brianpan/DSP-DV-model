@@ -177,7 +177,7 @@ def tokenize_sheet():
 
 # clean 被害人相對人, 通報表資料
 def lookup_process():
-	lookup_book = LookupTable('/Users/brianpan/Desktop/data/lookup_table.xlsx')
+	lookup_book = LookupTable('/Users/brianpan/Desktop/data/data/lookup_table.xlsx')
 	lookup_book.set_sheet_id(1)
 
 	lookup_book.get_basic_info()
@@ -186,7 +186,7 @@ def lookup_process():
 
 	# start process
 	# book = xlrd.open_workbook('/Users/brianpan/Desktop/data/通報表被害人相對人資料.xls')
-	book = xlrd.open_workbook('/Users/brianpan/Desktop/data/個案被害人相對人資料.xls')
+	book = xlrd.open_workbook('/Users/brianpan/Desktop/data/data/個案被害人相對人資料.xls')
 	sheet = book.sheet_by_index(0)
 	print(sheet.nrows, sheet.ncols)
 	#
@@ -245,7 +245,7 @@ def lookup_process():
 	
 
 	# output.save("/Users/brianpan/Desktop/data/通報表被害人相對人資料_clean.xls")
-	output.save("/Users/brianpan/Desktop/data/個案被害人相對人資料_clean.xls")
+	output.save("/Users/brianpan/Desktop/data/data/個案被害人相對人資料_clean.xls")
 # load lookup table
 if __name__ == "__main__":
 	tokenize_sheet()

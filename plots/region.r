@@ -2,8 +2,8 @@ library(tidyr)
 library(dplyr)
 library(ggplot2)
 
-test_data <-read.csv("/Users/brianpan/Desktop/data/rf_numerical.csv")
-region_data <- read.csv("/Users/brianpan/Desktop/data/各里案件數.csv")
+test_data <-read.csv("/Users/brianpan/Desktop/data/results/rf_numerical.csv")
+region_data <- read.csv("/Users/brianpan/Desktop/data/plots/各里案件數.csv")
 region_data <- subset(region_data[1:455,], select=c(location, 親密關係))
 separate_region <- region_data %>% separate(location, c("district", "town"), "區")
 
@@ -35,10 +35,10 @@ g <- g + theme(legend.title=element_blank()) + theme(text = element_text(family 
 
 
 
-# names(district_cor) <- c("區", "相關係數")
+names(district_cor) <- c("區", "相關係數")
 # save(district_cor, file="/Users/brianpan/Desktop/data/district_cor.RData")
 
 # #draw boxplot
-# draw_cor <- matrix(district_cor$相關係數, nrow=1)
-# colnames(draw_cor) <- district_cor$區
-# barplot(draw_cor, ylim =c(-0.5,0.5), legend=T,ylab="相關係數", xlab="台北市行政區")
+draw_cor <- matrix(district_cor$相關係數, nrow=1)
+colnames(draw_cor) <- district_cor$區
+barplot(draw_cor, ylim =c(-0.5,0.5), legend=T,ylab="相關係數", xlab="台北市行政區")

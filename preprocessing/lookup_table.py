@@ -61,7 +61,7 @@ class LookupTable(object):
 			return False
 
 if __name__ == "__main__":
-	book = LookupTable('/Users/brianpan/Desktop/data/lookup_table.xlsx')
+	book = LookupTable('/Users/brianpan/Desktop/data/data/lookup_table.xlsx')
 	book.set_sheet_id(1)
 
 	book.get_basic_info()

@@ -1,16 +1,16 @@
-library('caret')
-library('mlr')
-
-train_data <- read.csv("/Users/brianpan/Desktop/data/sample.csv")
+train_data <- read.csv("/Users/brianpan/Desktop/data/model/sample.csv")
 train_data <- na.omit(train_data)
 
 train_data <- transform(train_data, OCCUPATION.無工作=(OCCUPATION=="無工作"))
 train_data <- transform(train_data, OCCUPATION.不詳=(OCCUPATION=="不詳"))
+train_data$OCCUPATION.無工作 <- factor(train_data$OCCUPATION.無工作)
+train_data$OCCUPATION.不詳 <- factor(train_data$OCCUPATION.不詳)
 
-train_data <- subset(train_data, select=-c(Count, OCCUPATION, ACTIONID, district, AGE,TIPVDA, town, district))
-# train_data <- subset(train_data, select=-c(group, OCCUPATION, ACTIONID, district, AGE, TIPVDA, town, district))
+train_data <- subset(train_data, select=-c(Count, OCCUPATION, ACTIONID, district, AGE,TIPVDA, town))
 train_data$EDUCATION <- factor(train_data$EDUCATION)
 train_data$MAIMED <- factor(train_data$MAIMED)
+
+
 # train_data$被害人婚姻狀態 <- factor(train_data$被害人婚姻狀態)
 
 # lvq model feature selection
@@ -41,19 +41,7 @@ train_data$MAIMED <- factor(train_data$MAIMED)
 x <- subset(train_data, select=-c(group))
 y <- subset(train_data, select=c(group))
 
-# x <- subset(train_data, select=-c(Count))
-# y <- subset(train_data, select=c(Count))
 rfControl <- rfeControl(functions=rfFuncs, method="cv", number=10)
 RandomForestFeature <- rfe(x, y[,1], c(1:25), rfeControl=rfControl)
 rf_predictors <- predictors(RandomForestFeature)
-save(rf_predictors, file="/Users/brianpan/Desktop/data/rf_features.RData")
-
-# svm selection
-# x <- subset(train_data, select=-c(group, town))
-# y <- subset(train_data, select=c(group))
-
-# svmFeatureSelection <- rfe(x, factor(y[, 1]), size=c(10, 15),
-# 						   rfeControl= rfeControl(functions=caretFuncs, number=100),
-# 						   method="svmRadial")
-# svm_predictors <- predictors(svmFeatureSelection)
-# save(svm_predictors, file="/Users/brianpan/Desktop/data/svm_features.RData")
+save(rf_predictors, file="/Users/brianpan/Desktop/data/model/rf_features.RData")

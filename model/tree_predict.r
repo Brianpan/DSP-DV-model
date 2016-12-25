@@ -15,10 +15,15 @@ calc_table <- function(test_data, model){
 # https://topepo.github.io/caret/recursive-feature-elimination.html#helper-functions
 library(rpart)
 library(randomForest)
+library(randomForestSRC)
 library(mlr)
 library(dplyr)
-
 par(family="LiHei Pro")
+
+rf_model_file <- "/Users/brianpan/Desktop/data/website/rf_model.RData"
+dt_model_file <- "/Users/brianpan/Desktop/data/website/dt_model.RData"
+rf_src_model_file <- "/Users/brianpan/Desktop/data/website/rf_src_model.RData"
+
 train_data <- read.csv("/Users/brianpan/Desktop/data/model/sample.csv")
 train_data <- na.omit(train_data)
 train_data <- transform(train_data, OCCUPATION.無工作=(OCCUPATION=="無工作"))
@@ -36,44 +41,50 @@ test_data <- transform(test_data, OCCUPATION.不詳=(OCCUPATION=="不詳"))
 test_data <- transform(test_data, group=( ifelse(Count > 2, 2, 1) ) ) 
 test_data$EDUCATION <- factor(test_data$EDUCATION)
 test_data$MAIMED <- factor(test_data$MAIMED)
-# test_data$被害人婚姻狀態 <- factor(test_data$被害人婚姻狀態)
-tt <- test_data
+
+tmp_test <- test_data
 test_data <- subset(test_data, select=-c(district, town))
 
 # model 
-rf_rdata <- "/Users/brianpan/Desktop/data/model/rf_features.RData"
+rf_rdata <- "/Users/brianpan/Desktop/data/website/rf_features.RData"
 load(rf_rdata)
 x <- subset(train_data, select=rf_predictors)
 y <- subset(train_data, select=c(group))
-# y <- subset(train_data, select=c(Count))
 rf_train_data <- cbind(x,y)
 
-# model_rf_10 <- rpart(group ~  ., data=rf_train_data)
-rfmodel_rf_10 <- randomForest(group ~ ., data=rf_train_data)
-rfrf_10_t_result <- table(train_data$group, round(predict(rfmodel_rf_10, train_data) ))
+model_dt <- rpart(group ~  ., data=rf_train_data)
+# RandomForest & RandomForestSRC
+# http://stats.stackexchange.com/questions/190911/randomforest-vs-randomforestsrc-discrepancies
+model_rf <- randomForest(group ~ ., data=rf_train_data)
+model_rf_src <-rfsrc(factor(group) ~ ., data=rf_train_data, ntree=500, nodesize=5)
 
+rf_result <- table(train_data$group, round(predict(model_rf, train_data) ))
+rf_src_result <- table(train_data$group, round(predict(model_rf_src, train_data)$predicted ))
 
-# model_rf_10 <- rpart(factor(Count) ~  ., data=rf_train_data)
-# rfmodel_rf_10 <- randomForest(factor(Count) ~ ., data=rf_train_data)
+save(model_rf, file=rf_model_file)
+save(model_dt, file=dt_model_file)
+save(model_rf_src, file=rf_src_model_file)
 # test
-# rf_10_result <- calc_table(test_data, model_rf_10)
+# rf_10_result <- calc_table(test_data, model_rf)
 
-# rfrf_10_result <- table(test_data$group, predict(rfmodel_rf_10, test_data))
-rfrf_10_result <- table(test_data$group, round(predict(rfmodel_rf_10, test_data) ))
+dt_test_result <- table(test_data$group, round(predict(model_dt, test_data) ))
+rf_test_result <- table(test_data$group, round(predict(model_rf, test_data) ))
+rf_src_test_result <- table(test_data$group, round(predict(model_rf_src, test_data)$predicted ))
 
 # 輸出預測的平均 
-district_file <- "/Users/brianpan/Desktop/data/results/district_rank.csv"
-tt$predict <-predict(rfmodel_rf_10, test_data)
-district_sheet <- tt %>% group_by(town) %>% summarise(avg_predict=mean(predict))
+district_file <- "/Users/brianpan/Desktop/data/results/district.csv"
+tmp_test$predict <-predict(model_rf, test_data)
+district_sheet <- tmp_test %>% group_by(town) %>% summarise(avg_predict=mean(predict))
 write.csv(district_sheet, district_file)
 
 # 輸出沒風險被分為高風險的平均
-test_data$predict<-predict(rfmodel_rf_10, test_data)
+tmp_test$predict<-predict(model_rf, test_data)
 
-to_extract <-test_data[round(test_data$predict)==2 & test_data$group==1,]
-to_extract <- subset(to_extract, select=c(ACTIONID, Count, predict, group, district, town) )
+to_extract <-tmp_test[round(tmp_test$predict)==2 & tmp_test$group==1,]
+
+to_extract <- subset(tmp_test, select=c(ACTIONID, Count, predict, group, district, town) )
 out<-data.frame(to_extract)
 out_file <- "/Users/brianpan/Desktop/data/results/rf_numerical.csv"
 write.csv(out, out_file)
 
-reprtree:::plot.getTree(rfmodel_rf_10, k=6)
+reprtree:::plot.getTree(model_rf, k=6)

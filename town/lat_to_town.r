@@ -8,7 +8,7 @@ Graphpath <- "/Users/brianpan/Desktop/data/town"
 
 tw <- readOGR(dsn = Graphpath, layer = "Village_NLSC_1050715", encoding = "big5")
 
-# # # 按照之前所定義，只取高雄市，並將高雄港和軍事用地去除
+
 taipei <- tw[tw$C_Name=="臺北市",] 
 li <- SpatialPolygons(taipei@polygons)
 
@@ -26,4 +26,4 @@ towns <- tpNames
 district <- districts[over(df_sp, li)]
 town <- towns[over(df_sp, li)]
 output_csv <- cbind(district, town)
-write.csv(output_csv, file="/Users/brianpan/Desktop/data/district.csv")
+write.csv(output_csv, file="/Users/brianpan/Desktop/data/town/district.csv")
